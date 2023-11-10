@@ -1,0 +1,20 @@
+cat << EOF > $DATA/dbconfig/$ORACLE_SID/dbca.23c.rsp
+responseFileVersion=/oracle/assistants/rspfmt_dbca_response_schema_v23.0.0
+gdbName=${ORACLE_SID}CDB
+sid=${ORACLE_SID}CDB
+createAsContainerDatabase=TRUE
+numberOfPDBs=1
+pdbName=${ORACLE_SID}PDB
+databaseConfigType=SI
+pdbAdminPassword=oracle
+templateName=General_Purpose.dbc
+sysPassword=oracle
+systemPassword=oracle
+emConfiguration=NONE
+characterSet=AL32UTF8
+nationalCharacterSet=AL16UTF16
+#initParams=db_create_file_dest=${DATA},db_create_online_log_dest_1=${RECO},db_recovery_file_dest=${RECO}/fast_recovery_area,audit_trail=none,audit_sys_operations=false,parallel_max_servers=16,sga_max_size=2004877312,sga_target=1002438656
+initParams=db_create_file_dest=${DATA},db_create_online_log_dest_1=${RECO},db_recovery_file_dest=${RECO}/fast_recovery_area,audit_trail=none,audit_sys_operations=false
+automaticMemoryManagement=FALSE
+totalMemory=2048
+EOF

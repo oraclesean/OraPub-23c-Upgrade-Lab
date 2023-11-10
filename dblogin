@@ -1,0 +1,13 @@
+  if [ "$(docker ps --format "{{.Names}}" | wc -l)" -eq 0 ]
+then echo "There are no running database containers" && exit 0
+elif [ -z $1 ]
+then
+       if [ "$(docker ps --format "{{.Names}}" | wc -l)" -gt 1 ]
+     then echo "There is more than one active database container:"
+     else docker exec -it "$(docker ps --format "{{.Names}}")" bash
+     fi
+elif [ "$(docker ps --format "{{.Names}}" | egrep -c "^$1$")" -eq 1 ]
+then docker exec -it "$1" bash
+else echo "Invalid container selected. Choose to login to one of the following database containers:"
+     docker ps --format "{{.Names}}"
+fi
