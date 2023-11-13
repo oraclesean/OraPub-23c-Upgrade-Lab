@@ -111,3 +111,86 @@ $ORACLE_19C_HOME/jdk/bin/java -jar /scripts/autoupgrade.jar -config /u02/app/ora
 ```
 
 From the autoupgrade prompt, type `help` to see a list of available commands. You can log into the lab through a second session and tail the log output to get a detailed view of the upgrade progress, or run the `status` command to see progress. To refresh the output every 30 seconds, run `status -a 30`.
+
+## Run the Lab Locally
+The lab environments are ready-made Docker containers. If you'd like to run these on your local system, install the Docker software and perform the following steps.
+
+### Pull the Images
+Images are packages that include everything needed to run software. Use the `docker pull` command to get the Oracle Database environments used in the lab on your local system:
+```
+docker pull sjc.ocir.io/axmkfxakqxcq/oracle/db:11-19
+docker pull sjc.ocir.io/axmkfxakqxcq/oracle/db:12-19
+docker pull sjc.ocir.io/axmkfxakqxcq/oracle/db:19-23
+```
+
+### Create Data Directories
+Containers are ephemeral, and ordinarilly the data created inside them is lost when removing the container. To get around this, we can persist data to a local directory on the host machine.
+
+Create a root directory on your local machine to host your data. In this example, I'm setting variables for the container name and data directory, assigning the image, then creating the directory:
+```
+CONTAINER_NAME=UPG1119
+IMAGE_NAME=sjc.ocir.io/axmkfxakqxcq/oracle/db:11-19
+ORADATA_DIR=/home/myuser/oradata
+mkdir -p $ORADATA_DIR/$CONTAINER_NAME/{audit,data,diag,reco,scripts}
+```
+
+### Create Data Volumes
+A Docker volume associates the physical directory to a logical object known to the Docker engine and helps track and manage the resources. 
+
+Create volumes for the database resources:
+```
+ for dir in audit data diag reco
+  do docker volume create --opt type=none --opt o=bind \
+            --opt device="${ORADATA_DIR}"/"${CONTAINER_NAME}"/"${dir}" \
+            "${CONTAINER_NAME}"_"${dir}"
+done
+```
+
+### Capture Environment Variables
+The images contain embedded metadata, including the `ORACLE_BASE`, `DATA` and `RECO` directories. 
+
+Use the following commands to extract the metadata and set values in the local system:
+```
+export DATA="$(docker inspect --format='{{range .Config.Env}}{{println .}}{{end}}' "${IMAGE_NAME}" | grep -e "^DATA\b" | cut -d= -f2)"
+export RECO="$(docker inspect --format='{{range .Config.Env}}{{println .}}{{end}}' "${IMAGE_NAME}" | grep -e "^RECO\b" | cut -d= -f2)"
+export ORACLE_BASE="$(docker inspect --format='{{range .Config.Env}}{{println .}}{{end}}' "${IMAGE_NAME}" | grep -e "^ORACLE_BASE\b" | cut -d= -f2)"
+```
+
+### Create a Container
+"Running" an image creates a container. The following command creates a new container on your systemn, maps the directories you created on your local system to file systems inside the container, and assigns environment variables used to create the database:
+```
+docker run -d \
+       --name "${CONTAINER_NAME}" \
+       --volume "${CONTAINER_NAME}"_data:"${DATA}" \
+       --volume "${CONTAINER_NAME}"_reco:"${RECO}" \
+       --volume "${CONTAINER_NAME}"_diag:"${ORACLE_BASE}"/diag \
+       --volume "${CONTAINER_NAME}"_audit:"${ORACLE_BASE}"/admin \
+       --volume "${ORADATA_DIR}"/upgrade-lab:/scripts \
+       --volume "${ORADATA_DIR}"/upgrade-lab/startup:"${ORACLE_BASE}"/scripts/startup \
+       -e ORACLE_SID=ORCL \
+       -e ORACLE_PDB=ORCLPDB \
+       "${IMAGE_NAME}"
+```
+
+The first time you run the container, it creates a database under the "source" database home. For the 11g and 12c to 19c images, this will be an 11g or 12c database. For the 19c to 23c image, it's a 19c database. You can track its progress by watching the container logs:
+```
+docker logs -f "${CONTAINER_NAME}"
+```
+
+Once you see a message that database creation is complete, the container is ready to work with.
+
+### Manage and Connect to the Container
+Check the containers on the system and their status:
+```
+docker ps -a
+```
+
+Start a stopped container:
+```
+docker start $CONTAINER_NAME
+```
+
+Connect to a container (think of this as SSH-ing to the database host):
+```
+docker exec -it $CONTAINER_NAME bash
+```
