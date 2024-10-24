@@ -33,11 +33,12 @@ REM (ERROR Dispatcher failed: AutoUpgException [UPG-1316]):
 alter system set parallel_max_servers=16 scope=both;
 
 REM Add larger logfile groups:
-alter database add logfile group 11 size 200m;
-alter database add logfile group 12 size 200m;
-alter database add logfile group 13 size 200m;
-alter database add logfile group 14 size 200m;
-alter database add logfile group 15 size 200m;
+    begin
+      for i in 11..15
+     loop execute immediate 'alter database add logfile group ' || i || ' size 200m';
+ end loop;
+      end;
+/
 
 REM Drop original logfile groups:
     begin
@@ -70,14 +71,15 @@ REM Perform a second pass at logfile group removal, in case something remains:
 /
 EOF
 
-rm $DATA/$ORACLE_SID/redo*.log
+!rm $DATA/$ORACLE_SID/redo*.log 2>/dev/null
+!rm $RECO/$ORACLE_SID/onlinelog/*.log 2>/dev/null
 
   if [[ $ORACLE_VERSION =~ ^2 ]]
 then sqlplus / as sysdba << EOF
 REM Resize datafiles to avoid waiting on autoextend:
-alter database datafile 1 resize 1400m;
+alter database datafile 1 resize 1500m;
 alter database tempfile 1 resize 250m;
-alter database datafile 3 resize 950m;
+alter database datafile 3 resize 1000m;
 alter database datafile 4 resize 410m;
 EOF
 fi

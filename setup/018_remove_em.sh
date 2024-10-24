@@ -1,5 +1,8 @@
 # Reference: https://mikedietrichde.com/2017/08/05/enterprise-manager-em-clean-up-in-oracle-database-11-2-12-2
-export ORACLE_UNQNAME="${ORACLE_UNQNAME:-$ORACLE_SID}"
+
+# Do not run for version 23:
+  if [[ ! $ORACLE_VERSION =~ ^23 ]]
+then export ORACLE_UNQNAME="${ORACLE_UNQNAME:-$ORACLE_SID}"
 emctl stop dbconsole
 
 sqlplus / as sysdba << EOF
@@ -546,3 +549,4 @@ END;
 END;
 /
 EOF
+fi
