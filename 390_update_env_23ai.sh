@@ -1,10 +1,10 @@
-# Steps to update the Docker-specific configuration directory post-migration to 23c.
+# Steps to update the Docker-specific configuration directory post-migration to 23ai.
 SCRIPT_DIR=/scripts
 
 # Copy the updated oratab to the config directory for the original SID:
 cp /etc/oratab $DATA/dbconfig/$ORACLE_SID/
 
-# Set the environment for the 23c database:
+# Set the environment for the 23ai database:
 . oraenv <<< ${ORACLE_SID}CDB
 source /home/oracle/.bashrc
 

@@ -1,10 +1,10 @@
 # Get the target database home:
-TARGET_HOME="${ORACLE_23C_HOME:-$ORACLE_19C_HOME}"
+TARGET_HOME="${ORACLE_23AI_HOME:-$ORACLE_19C_HOME}"
 
 # Get the script directory:
 SCRIPT_DIR=/scripts
 
-  if [ -z "${ORACLE_23C_HOME}" ]
+  if [ -z "${ORACLE_23AI_HOME}" ]
 then AU_JAR=/scripts/autoupgrade.jar
 else AU_JAR="${TARGET_HOME}"/rdbms/admin/autoupgrade.jar
 fi

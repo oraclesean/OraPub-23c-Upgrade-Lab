@@ -1,4 +1,4 @@
-# Steps to add the 23c database to the Docker-specific configuration directory.
+# Steps to add the 23ai database to the Docker-specific configuration directory.
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 # Copy the updated oratab to the config directory for the original SID:
@@ -10,7 +10,7 @@ cp -rp $DATA/dbconfig/$ORACLE_SID $DATA/dbconfig/${ORACLE_SID}CDB/
 # Remove the SID-specific files:
 rm $DATA/dbconfig/${ORACLE_SID}CDB/*LAB*
 
-# Set the environment for the 23c database:
+# Set the environment for the 23ai database:
 . oraenv <<< ${ORACLE_SID}CDB
 source /home/oracle/.bashrc
 

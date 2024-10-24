@@ -1,4 +1,4 @@
-cat << EOF > $DATA/dbconfig/$ORACLE_SID/dbca.23c.rsp
+cat << EOF > $DATA/dbconfig/$ORACLE_SID/dbca.23ai.rsp
 responseFileVersion=/oracle/assistants/rspfmt_dbca_response_schema_v23.0.0
 gdbName=${ORACLE_SID}CDB
 sid=${ORACLE_SID}CDB
